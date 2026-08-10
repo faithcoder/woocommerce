@@ -29,6 +29,17 @@ abstract class Notification {
 	);
 
 	/**
+	 * Meta key recording when the notification was triggered.
+	 *
+	 * Written by {@see \Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore::add()}
+	 * at the moment the store event fires, and read back by
+	 * {@see self::get_triggered_timestamp()} when the payload is built — which
+	 * can happen much later (ActionScheduler safety net, retries). Persisting
+	 * it on the resource means every send path reports the true event time.
+	 */
+	const TRIGGERED_META_KEY = '_wc_push_notification_triggered';
+
+	/**
 	 * The ID of the resource this notification is about (e.g. order ID, comment
 	 * ID).
 	 *
@@ -96,6 +107,19 @@ abstract class Notification {
 	abstract public function write_meta( string $key ): void;
 
 	/**
+	 * Reads a meta value from this notification's resource.
+	 *
+	 * Returns an empty string when the key is absent or the resource no longer
+	 * exists.
+	 *
+	 * @param string $key The meta key.
+	 * @return string
+	 *
+	 * @since 11.1.0
+	 */
+	abstract public function read_meta( string $key ): string;
+
+	/**
 	 * Deletes a meta key from this notification's resource.
 	 *
 	 * @param string $key The meta key.
@@ -147,6 +171,27 @@ abstract class Notification {
 		}
 
 		return $instance;
+	}
+
+	/**
+	 * Returns the ISO 8601 timestamp of the moment this notification was
+	 * triggered, for the payload's `timestamp` field.
+	 *
+	 * Reads the trigger time recorded on the resource when the store event
+	 * fired (see {@see self::TRIGGERED_META_KEY}). Previously the payload was
+	 * stamped with the current time at send, so any delay between the event
+	 * and the send (safety net, retries) was invisible to delivery-age
+	 * monitoring. Falls back to the current time when no trigger time was
+	 * recorded (e.g. notifications already in flight when this shipped).
+	 *
+	 * @return string
+	 *
+	 * @since 11.1.0
+	 */
+	public function get_triggered_timestamp(): string {
+		$triggered_at = (int) $this->read_meta( self::TRIGGERED_META_KEY );
+
+		return gmdate( 'c', $triggered_at > 0 ? $triggered_at : time() );
 	}
 
 	/**

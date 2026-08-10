@@ -50,7 +50,7 @@ class NewOrderNotification extends Notification {
 		return array(
 			'type'        => $this->get_type(),
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->get_triggered_timestamp(),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
 				/**
@@ -124,6 +124,17 @@ class NewOrderNotification extends Notification {
 	public function has_meta( string $key ): bool {
 		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
 		return $order instanceof WC_Order && $order->meta_exists( $key );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function read_meta( string $key ): string {
+		$order = WC()->call_function( 'wc_get_order', $this->get_resource_id() );
+
+		return $order instanceof WC_Order ? (string) $order->get_meta( $key ) : '';
 	}
 
 	/**

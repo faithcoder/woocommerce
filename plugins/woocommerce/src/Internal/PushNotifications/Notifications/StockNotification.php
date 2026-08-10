@@ -226,7 +226,7 @@ class StockNotification extends Notification {
 
 		return array(
 			'type'        => $this->get_type(),
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->get_triggered_timestamp(),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => $this->build_title( $product_name ),
 			'message'     => $this->build_message( $product_name, $site_title, $product ),
@@ -267,6 +267,17 @@ class StockNotification extends Notification {
 	public function has_meta( string $key ): bool {
 		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
 		return $product instanceof WC_Product && $product->meta_exists( $key . '_' . $this->event_type );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function read_meta( string $key ): string {
+		$product = WC()->call_function( 'wc_get_product', $this->get_resource_id() );
+
+		return $product instanceof WC_Product ? (string) $product->get_meta( $key . '_' . $this->event_type ) : '';
 	}
 
 	/**

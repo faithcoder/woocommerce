@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use WC_Unit_Test_Case;
@@ -51,6 +52,18 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$this->store->add( $this->create_order_mock( 42 ) );
 
 		$this->assertSame( 1, $this->store->count() );
+	}
+
+	/**
+	 * @testdox Should record the trigger time on the resource when a notification is added.
+	 */
+	public function test_add_records_trigger_time(): void {
+		$notification = $this->create_order_mock( 42 );
+		$notification->expects( $this->once() )
+			->method( 'write_meta' )
+			->with( Notification::TRIGGERED_META_KEY );
+
+		$this->store->add( $notification );
 	}
 
 	/**

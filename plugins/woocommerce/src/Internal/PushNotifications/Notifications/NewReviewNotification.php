@@ -80,7 +80,7 @@ class NewReviewNotification extends Notification {
 		return array(
 			'type'        => $this->get_type(),
 			// This represents the time the notification was triggered, so we can monitor age of notification at delivery.
-			'timestamp'   => gmdate( 'c' ),
+			'timestamp'   => $this->get_triggered_timestamp(),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
 				/**
@@ -113,6 +113,15 @@ class NewReviewNotification extends Notification {
 	 */
 	public function has_meta( string $key ): bool {
 		return WC()->call_function( 'metadata_exists', 'comment', $this->get_resource_id(), $key );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function read_meta( string $key ): string {
+		return (string) WC()->call_function( 'get_comment_meta', $this->get_resource_id(), $key, true );
 	}
 
 	/**

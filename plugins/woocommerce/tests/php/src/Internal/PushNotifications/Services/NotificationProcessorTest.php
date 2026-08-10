@@ -489,6 +489,7 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 					'to_payload',
 					'has_meta',
 					'write_meta',
+					'read_meta',
 					'delete_meta',
 					'should_send_to_user',
 				)

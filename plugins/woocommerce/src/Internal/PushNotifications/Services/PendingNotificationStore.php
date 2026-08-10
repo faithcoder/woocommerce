@@ -100,6 +100,13 @@ class PendingNotificationStore {
 
 		$this->pending[ $key ] = $notification;
 
+		// Record the trigger time on the resource so every send path (loopback,
+		// safety net, retries) reports when the event happened rather than when
+		// the send finally ran. Written unconditionally: a repeat trigger (e.g.
+		// a later restock cycle) is a new event and must not inherit the
+		// previous cycle's time.
+		$notification->write_meta( Notification::TRIGGERED_META_KEY );
+
 		$this->schedule_safety_net( $notification );
 
 		if ( ! $this->shutdown_registered ) {
