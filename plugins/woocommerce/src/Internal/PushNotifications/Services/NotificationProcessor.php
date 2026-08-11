@@ -40,6 +40,19 @@ class NotificationProcessor {
 	const SAFETY_NET_HOOK = 'wc_push_notification_safety_net';
 
 	/**
+	 * Meta key recording when the notification was triggered.
+	 *
+	 * Written by {@see PendingNotificationStore::add()} at the moment the store
+	 * event fires, and read back by {@see Notification::get_triggered_timestamp()}
+	 * when the payload is built — which can happen much later (ActionScheduler
+	 * safety net, retries). Persisting it on the resource means every send path
+	 * reports the true event time.
+	 *
+	 * @since 11.2.0
+	 */
+	const TRIGGERED_META_KEY = '_wc_push_notification_triggered';
+
+	/**
 	 * Meta key written before the WPCOM send attempt.
 	 */
 	const CLAIMED_META_KEY = '_wc_push_notification_claimed';

@@ -7,8 +7,8 @@ namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 use Automattic\WooCommerce\Internal\PushNotifications\Dispatchers\InternalNotificationDispatcher;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore;
 use WC_Unit_Test_Case;
 
@@ -61,7 +61,7 @@ class PendingNotificationStoreTest extends WC_Unit_Test_Case {
 		$notification = $this->create_order_mock( 42 );
 		$notification->expects( $this->once() )
 			->method( 'write_meta' )
-			->with( Notification::TRIGGERED_META_KEY );
+			->with( NotificationProcessor::TRIGGERED_META_KEY );
 
 		$this->store->add( $notification );
 	}

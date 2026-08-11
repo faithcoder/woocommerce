@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Notifications;
 
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
-use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use WC_Helper_Order;
 use WC_Unit_Test_Case;
 
@@ -100,7 +100,7 @@ class NewOrderNotificationTest extends WC_Unit_Test_Case {
 		$notification = new NewOrderNotification( $order->get_id() );
 		$triggered_at = time() - 300;
 
-		$order->update_meta_data( Notification::TRIGGERED_META_KEY, (string) $triggered_at );
+		$order->update_meta_data( NotificationProcessor::TRIGGERED_META_KEY, (string) $triggered_at );
 		$order->save_meta_data();
 
 		$payload = $notification->to_payload();

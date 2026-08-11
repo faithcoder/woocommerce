@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\PushNotifications\Notifications;
 
+use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
 use InvalidArgumentException;
 
 defined( 'ABSPATH' ) || exit;
@@ -27,17 +28,6 @@ abstract class Notification {
 		'store_review' => NewReviewNotification::class,
 		'store_stock'  => StockNotification::class,
 	);
-
-	/**
-	 * Meta key recording when the notification was triggered.
-	 *
-	 * Written by {@see \Automattic\WooCommerce\Internal\PushNotifications\Services\PendingNotificationStore::add()}
-	 * at the moment the store event fires, and read back by
-	 * {@see self::get_triggered_timestamp()} when the payload is built — which
-	 * can happen much later (ActionScheduler safety net, retries). Persisting
-	 * it on the resource means every send path reports the true event time.
-	 */
-	const TRIGGERED_META_KEY = '_wc_push_notification_triggered';
 
 	/**
 	 * The ID of the resource this notification is about (e.g. order ID, comment
@@ -115,7 +105,7 @@ abstract class Notification {
 	 * @param string $key The meta key.
 	 * @return string
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	abstract public function read_meta( string $key ): string;
 
@@ -178,18 +168,18 @@ abstract class Notification {
 	 * triggered, for the payload's `timestamp` field.
 	 *
 	 * Reads the trigger time recorded on the resource when the store event
-	 * fired (see {@see self::TRIGGERED_META_KEY}). Previously the payload was
-	 * stamped with the current time at send, so any delay between the event
-	 * and the send (safety net, retries) was invisible to delivery-age
-	 * monitoring. Falls back to the current time when no trigger time was
-	 * recorded (e.g. notifications already in flight when this shipped).
+	 * fired (see {@see NotificationProcessor::TRIGGERED_META_KEY}). Previously
+	 * the payload was stamped with the current time at send, so any delay
+	 * between the event and the send (safety net, retries) was invisible to
+	 * delivery-age monitoring. Falls back to the current time when no trigger
+	 * time was recorded (e.g. notifications already in flight when this shipped).
 	 *
 	 * @return string
 	 *
-	 * @since 11.1.0
+	 * @since 11.2.0
 	 */
 	public function get_triggered_timestamp(): string {
-		$triggered_at = (int) $this->read_meta( self::TRIGGERED_META_KEY );
+		$triggered_at = (int) $this->read_meta( NotificationProcessor::TRIGGERED_META_KEY );
 
 		return gmdate( 'c', $triggered_at > 0 ? $triggered_at : time() );
 	}

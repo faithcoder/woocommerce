@@ -105,7 +105,7 @@ class PendingNotificationStore {
 		// the send finally ran. Written unconditionally: a repeat trigger (e.g.
 		// a later restock cycle) is a new event and must not inherit the
 		// previous cycle's time.
-		$notification->write_meta( Notification::TRIGGERED_META_KEY );
+		$notification->write_meta( NotificationProcessor::TRIGGERED_META_KEY );
 
 		$this->schedule_safety_net( $notification );
 
